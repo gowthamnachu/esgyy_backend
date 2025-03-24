@@ -8,26 +8,8 @@
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/server.js",
-      "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-      "headers": {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization"
-      }
-    },
-    {
-      "src": "/uploads/(.*)",
-      "dest": "/server.js"
-    },
-    {
-      "src": "/health",
-      "dest": "/server.js"
+      "src": "/(.*)",
+      "dest": "server.js"
     }
-  ],
-  "env": {
-    "MONGODB_URI": "mongodb+srv://gowthamnachu545:gowtham123@esgyy.baheh.mongodb.net/loveapp",
-    "NODE_ENV": "production"
-  }
+  ]
 }
