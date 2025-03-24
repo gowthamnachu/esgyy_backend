@@ -1,34 +1,45 @@
-import express from 'express';
-import serverless from 'serverless-http';
-import mongoose from 'mongoose';
-import cors from 'cors';
-import multer from 'multer';
+const express = require('express');
+const serverless = require('serverless-http');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const multer = require('multer');
 
 const app = express();
 
-app.use(cors({
-  origin: '*',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+// CORS and JSON middleware
+app.use(cors());
 app.use(express.json());
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('MongoDB connection error:', err));
+
+// Schemas
+const Background = mongoose.model('Background', {
+  backgroundType: String,
+  backgroundValue: String,
+  createdAt: { type: Date, default: Date.now }
 });
 
-// Configure multer for file uploads
-const storage = multer.memoryStorage(); // Using memory storage for serverless
-const upload = multer({ storage: storage });
+const Message = mongoose.model('Message', {
+  sender: String,
+  content: String,
+  createdAt: { type: Date, default: Date.now },
+  seenBy: [String]
+});
 
-// Schema definitions
-// ...existing schema code...
+const Memory = mongoose.model('Memory', {
+  title: String,
+  description: String,
+  date: Date,
+  images: [String],
+  sender: String,
+  createdAt: { type: Date, default: Date.now }
+});
 
-// Routes with /api prefix removed since Netlify adds it
-app.get('/backgrounds', async (req, res) => {
+// Basic routes without file handling
+app.get('/.netlify/functions/server/api/backgrounds', async (req, res) => {
   try {
     const backgrounds = await Background.find().sort({ createdAt: -1 });
     res.json(backgrounds);
@@ -37,6 +48,19 @@ app.get('/backgrounds', async (req, res) => {
   }
 });
 
-// ...existing routes with /api prefix removed...
+app.get('/.netlify/functions/server/api/messages', async (req, res) => {
+  try {
+    const messages = await Message.find().sort({ createdAt: -1 });
+    res.json(messages);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
-export const handler = serverless(app);
+// Health check
+app.get('/.netlify/functions/server/health', (req, res) => {
+  res.json({ status: 'Server is running' });
+});
+
+module.exports = app;
+module.exports.handler = serverless(app);
