@@ -12,20 +12,15 @@ const __dirname = dirname(__filename);
 
 const app = express();
 
-// Update CORS configuration
 app.use(cors({
-  origin: '*',
+  origin: 'http://localhost:3000',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 
-// Update file paths for Vercel
-const uploadDir = process.env.NODE_ENV === 'production' 
-  ? '/tmp'
-  : path.join(process.cwd(), 'uploads');
-
+const uploadDir = path.join(process.cwd(), 'uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -255,5 +250,8 @@ app.delete('/api/memories/:memoryId', async (req, res) => {
 app.get('/health', (req, res) => {
   res.json({ status: 'Server is running' });
 });
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 export default app;
